@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"mini-social/internal/bootstrap"
 	"mini-social/internal/config"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,15 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("load config failed:%v", err)
+	}
+
+	//数据库初始化和迁移
+	db, err := bootstrap.InitDB(cfg)
+	if err != nil {
+		log.Fatalf("init db failed:%v", err)
+	}
+	if err := bootstrap.AutoMigrate(db); err != nil {
+		log.Fatalf("migrate db failed:%v", err)
 	}
 
 	r := gin.Default()
