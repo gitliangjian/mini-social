@@ -6,6 +6,10 @@ import (
 
 	"mini-social/internal/bootstrap"
 	"mini-social/internal/config"
+	"mini-social/internal/handler"
+	"mini-social/internal/repository"
+	"mini-social/internal/router"
+	"mini-social/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +30,10 @@ func main() {
 		log.Fatalf("migrate db failed:%v", err)
 	}
 
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
+
 	r := gin.Default()
 
 	r.GET("/test", func(c *gin.Context) {
@@ -33,6 +41,8 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	router.RegisterUserRoutes(r, userHandler)
 
 	//加载服务端口号
 	addr := ":" + cfg.App.Port
