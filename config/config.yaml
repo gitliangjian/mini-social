@@ -1,0 +1,8 @@
+app:
+  port: 8080
+
+mysql:
+  dsn: "root:125374@tcp(127.0.0.1:3306)/mini-social?charset=utf8mb4&parseTime=True&loc=Local"
+
+jwt:
+  secret: "mini-social-dev-secret"
