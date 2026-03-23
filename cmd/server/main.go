@@ -31,7 +31,8 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, cfg.JWT.Secret)
+	log.Println("jwt secret:", cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userService)
 
 	r := gin.Default()

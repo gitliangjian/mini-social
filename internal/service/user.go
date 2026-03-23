@@ -4,6 +4,7 @@ import (
 	"errors"
 	"mini-social/internal/model"
 	"mini-social/internal/repository"
+	jwtutil "mini-social/pkg/jwt"
 	"mini-social/pkg/password"
 	"regexp"
 
@@ -14,22 +15,37 @@ import (
 var (
 	ErrUsernameAlreadyExists = errors.New("用户名已存在")
 	ErrInvalidUsername       = errors.New("用户名格式不正确：须为3-20位字母、数字或下划线")
+	ErrInvalidCredentials    = errors.New("用户名或密码错误")
 )
 
 // 用户名正则表达式
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_]{3,20}$`)
 
 type UserService struct {
-	userRepo *repository.UserRepository
+	userRepo  *repository.UserRepository
+	jwtSecret string
 }
 
-func NewUserService(userRepo *repository.UserRepository) *UserService {
-	return &UserService{userRepo: userRepo}
+func NewUserService(userRepo *repository.UserRepository, jwtSecret string) *UserService {
+	return &UserService{
+		userRepo:  userRepo,
+		jwtSecret: jwtSecret,
+	}
 }
 
 type RegisterInput struct {
 	Username string
 	Password string
+}
+
+type LoginInput struct {
+	Username string
+	Password string
+}
+
+type LoginResult struct {
+	Token string
+	User  *model.User
 }
 
 func (s *UserService) Register(Input RegisterInput) (*model.User, error) {
@@ -67,4 +83,28 @@ func (s *UserService) Register(Input RegisterInput) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *UserService) Login(Input LoginInput) (*LoginResult, error) {
+	//按用户名查找用户是否存在
+	user, err := s.userRepo.GetByUsername(Input.Username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+	//校验密码
+	if err := password.Check(Input.Password, user.PasswordHash); err != nil {
+		return nil, ErrInvalidCredentials
+	}
+	//生成token
+	token, err := jwtutil.GenerateToken(s.jwtSecret, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &LoginResult{
+		Token: token,
+		User:  user,
+	}, nil
 }

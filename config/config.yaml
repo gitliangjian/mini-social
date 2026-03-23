@@ -5,4 +5,4 @@ mysql:
   dsn: "root:125374@tcp(127.0.0.1:3306)/mini_social?charset=utf8mb4&parseTime=True&loc=Local"
 
 jwt:
-  secret: "mini-social-dev-secret"
+  secret: "7f8b2a1c9d4e5f6a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3"

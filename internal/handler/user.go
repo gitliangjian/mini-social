@@ -23,6 +23,11 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
+type LoginRequest struct {
+	Username string `json:"username" binding:"required,min=3,max=20"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
 func (h *UserHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -31,6 +36,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	req.Password = strings.TrimSpace(req.Password)
+	req.Username = strings.TrimSpace(req.Username)
 
 	user, err := h.userService.Register(service.RegisterInput{
 		Username: req.Username,
@@ -47,5 +53,38 @@ func (h *UserHandler) Register(c *gin.Context) {
 	response.Success(c, gin.H{
 		"id":       user.ID,
 		"username": user.Username,
+	})
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "参数格式错误: "+err.Error())
+		return
+	}
+
+	req.Username = strings.TrimSpace(req.Username)
+	req.Password = strings.TrimSpace(req.Password)
+
+	result, err := h.userService.Login(service.LoginInput{
+		Username: req.Username,
+		Password: req.Password,
+	})
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidCredentials) {
+			response.BadRequest(c, "用户名或密码错误")
+			return
+		}
+		c.Error(err)
+		response.InternalError(c, err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{
+		"token": result.Token,
+		"user": gin.H{
+			"id":       result.User.ID,
+			"username": result.User.Username,
+		},
 	})
 }
