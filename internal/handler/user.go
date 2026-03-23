@@ -94,7 +94,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 	//从JWT鉴权的中间件获取userID，即当前登录的用户
 	userIDValue, exists := c.Get(middleware.CtxUserIDKey)
 	if !exists {
-		response.BadRequest(c, "user id not found in context")
+		response.Unauthorized(c, "user id not found in context")
 		return
 	}
 
@@ -107,7 +107,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 	user, err := h.userService.GetByID(userID)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			response.BadRequest(c, "user not found")
+			response.NotFound(c, "user not found")
 			return
 		}
 		response.InternalError(c, "get current user failed")

@@ -3,7 +3,7 @@ package middleware
 import (
 	"mini-social/internal/config"
 	jwtutil "mini-social/pkg/jwt"
-	"net/http"
+	"mini-social/pkg/response"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,22 +15,14 @@ func JWTAuth(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 401,
-				"msg":  "authorization header is required",
-				"data": nil,
-			})
+			response.Unauthorized(c, "authorization header is required")
 			c.Abort()
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" || strings.TrimSpace(parts[1]) == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 401,
-				"msg":  "invalid authorization header",
-				"data": nil,
-			})
+			response.Unauthorized(c, "invalid authorization header")
 			c.Abort()
 			return
 		}
@@ -38,11 +30,7 @@ func JWTAuth(cfg *config.Config) gin.HandlerFunc {
 		tokenString := parts[1]
 		claims, err := jwtutil.ParseToken(cfg.JWT.Secret, tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 401,
-				"msg":  "invalid or expired token",
-				"data": nil,
-			})
+			response.Unauthorized(c, "invalid or expired token")
 			c.Abort()
 			return
 		}
