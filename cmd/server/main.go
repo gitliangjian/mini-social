@@ -35,6 +35,10 @@ func main() {
 	log.Println("jwt secret:", cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userService)
 
+	momentRepo := repository.NewMomentRepository(db)
+	momentService := service.NewMomentService(momentRepo)
+	momentHandler := handler.NewMomentHandler(momentService)
+
 	r := gin.Default()
 
 	r.GET("/test", func(c *gin.Context) {
@@ -44,6 +48,7 @@ func main() {
 	})
 
 	router.RegisterUserRoutes(r, cfg, userHandler)
+	router.RegisterMomentRoutes(r, cfg, momentHandler)
 
 	//加载服务端口号
 	addr := ":" + cfg.App.Port

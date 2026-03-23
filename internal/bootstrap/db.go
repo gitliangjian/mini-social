@@ -33,7 +33,10 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 
 // 自动迁移
 func AutoMigrate(db *gorm.DB) error {
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Moment{},
+	); err != nil {
 		return fmt.Errorf("auto migrate failed:%w", err)
 	}
 
