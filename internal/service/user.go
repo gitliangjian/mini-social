@@ -16,6 +16,7 @@ var (
 	ErrUsernameAlreadyExists = errors.New("用户名已存在")
 	ErrInvalidUsername       = errors.New("用户名格式不正确：须为3-20位字母、数字或下划线")
 	ErrInvalidCredentials    = errors.New("用户名或密码错误")
+	ErrUserNotFound          = errors.New("user not found")
 )
 
 // 用户名正则表达式
@@ -107,4 +108,15 @@ func (s *UserService) Login(Input LoginInput) (*LoginResult, error) {
 		Token: token,
 		User:  user,
 	}, nil
+}
+
+func (s *UserService) GetByID(id uint) (*model.User, error) {
+	user, err := s.userRepo.GetByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return user, nil
 }

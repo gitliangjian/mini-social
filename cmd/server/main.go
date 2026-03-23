@@ -43,7 +43,7 @@ func main() {
 		})
 	})
 
-	router.RegisterUserRoutes(r, userHandler)
+	router.RegisterUserRoutes(r, cfg, userHandler)
 
 	//加载服务端口号
 	addr := ":" + cfg.App.Port

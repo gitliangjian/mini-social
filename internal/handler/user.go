@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"mini-social/internal/middleware"
 	"mini-social/internal/service"
 	"mini-social/pkg/response"
 	"strings"
@@ -86,5 +87,39 @@ func (h *UserHandler) Login(c *gin.Context) {
 			"id":       result.User.ID,
 			"username": result.User.Username,
 		},
+	})
+}
+
+func (h *UserHandler) Me(c *gin.Context) {
+	//从JWT鉴权的中间件获取userID，即当前登录的用户
+	userIDValue, exists := c.Get(middleware.CtxUserIDKey)
+	if !exists {
+		response.BadRequest(c, "user id not found in context")
+		return
+	}
+
+	userID, ok := userIDValue.(uint)
+	if !ok {
+		response.BadRequest(c, "invalid user id type")
+		return
+	}
+
+	user, err := h.userService.GetByID(userID)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			response.BadRequest(c, "user not found")
+			return
+		}
+		response.InternalError(c, "get current user failed")
+		// c.Error(err)
+		// response.InternalError(c, err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{
+		"id":         user.ID,
+		"username":   user.Username,
+		"created_at": user.CreatedAt,
+		"updated_at": user.UpdatedAt,
 	})
 }

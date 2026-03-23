@@ -28,6 +28,16 @@ func (r *UserRepository) GetByUsername(username string) (*model.User, error) {
 	return &user, nil
 }
 
+// 按id查表
+func (r *UserRepository) GetByID(id uint) (*model.User, error) {
+	var user model.User
+	err := r.db.First(&user, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (r *UserRepository) Create(user *model.User) error {
 	return r.db.Create(user).Error
 }
