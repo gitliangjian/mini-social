@@ -30,14 +30,21 @@ func main() {
 		log.Fatalf("migrate db failed:%v", err)
 	}
 
+	//用户
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo, cfg.JWT.Secret)
 	log.Println("jwt secret:", cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userService)
 
+	//动态
 	momentRepo := repository.NewMomentRepository(db)
 	momentService := service.NewMomentService(momentRepo)
 	momentHandler := handler.NewMomentHandler(momentService)
+
+	//评论
+	commentRepo := repository.NewCommentRepository(db)
+	commentService := service.NewCommentService(commentRepo)
+	commentHandler := handler.NewCommentHandler(commentService)
 
 	r := gin.Default()
 
@@ -48,7 +55,7 @@ func main() {
 	})
 
 	router.RegisterUserRoutes(r, cfg, userHandler)
-	router.RegisterMomentRoutes(r, cfg, momentHandler)
+	router.RegisterMomentRoutes(r, cfg, momentHandler, commentHandler)
 
 	//加载服务端口号
 	addr := ":" + cfg.App.Port
