@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Moment struct {
@@ -11,4 +13,7 @@ type Moment struct {
 	Content   string    `gorm:"type:text;not null" json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+
+	//实现软删除
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }

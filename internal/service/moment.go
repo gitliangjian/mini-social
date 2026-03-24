@@ -5,10 +5,14 @@ import (
 	"mini-social/internal/model"
 	"mini-social/internal/repository"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 var (
 	ErrInvalidMomentContent = errors.New("invalid moment content")
+	ErrMomentNotFound       = errors.New("moment not found")
+	ErrMomentForbidden      = errors.New("no permission to delete this moment")
 )
 
 type MomentService struct {
@@ -81,3 +85,40 @@ func (s *MomentService) List(input ListMomentsInput) (*ListMomentsResult, error)
 		PageSize: pageSize,
 	}, nil
 }
+
+func (s *MomentService) GetByID(id uint) (*model.Moment, error) {
+	moment, err := s.momentRepo.GetByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrMomentNotFound
+		}
+		return nil, err
+	}
+	return moment, nil
+}
+
+func (s *MomentService) Delete(userID, momentID uint) error {
+	//直接尝试删除属于该用户的特定动态
+	result := s.momentRepo.DeleteWithAuth(momentID, userID)
+	//不区分无权限和动态不存在的情况
+	return result
+}
+
+// //查找动态对应的userid
+// id, err := s.momentRepo.GetUserIDByID(momentID)
+// if err != nil {
+// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+// 		return ErrMomentNotFound
+// 	}
+// 	return err
+// }
+// //比较查到的id和handler层传下来的userID是否相同
+// if id != userID {
+// 	return ErrMomentForbidden
+// }
+
+// //删除
+// if err := s.momentRepo.Delete(momentID); err != nil {
+// 	return err
+// }
+// return nil

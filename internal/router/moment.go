@@ -14,12 +14,14 @@ func RegisterMomentRoutes(r *gin.Engine, cfg *config.Config, momentHandler *hand
 		moments := api.Group("/moments")
 		{
 			moments.GET("", momentHandler.List)
+			moments.GET("/:id", momentHandler.Detail)
 		}
 
 		authMoments := api.Group("/moments")
 		authMoments.Use(middleware.JWTAuth(cfg))
 		{
 			authMoments.POST("", momentHandler.Create)
+			authMoments.DELETE("/:id", momentHandler.Delete)
 		}
 	}
 }
