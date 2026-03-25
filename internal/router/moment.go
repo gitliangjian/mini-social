@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// comment是moment的子资源，所以将comment相关路由也放在这里
-func RegisterMomentRoutes(r *gin.Engine, cfg *config.Config, momentHandler *handler.MomentHandler, commentHandler *handler.CommentHandler) {
+// comment/like是moment的子资源，所以将相关路由也放在这里
+func RegisterMomentRoutes(r *gin.Engine, cfg *config.Config, momentHandler *handler.MomentHandler, commentHandler *handler.CommentHandler, likeHandler *handler.LikeHandler) {
 	api := r.Group("/api/v1")
 	{
 		moments := api.Group("/moments")
@@ -32,6 +32,17 @@ func RegisterMomentRoutes(r *gin.Engine, cfg *config.Config, momentHandler *hand
 				comments.POST("", commentHandler.Create)
 				comments.DELETE("/:comment_id", commentHandler.Delete)
 			}
+
+			// 点赞动态： POST /api/v1/moments/:id/like
+			authMoments.POST("/:moment_id/like", likeHandler.Like) // target_type = "moment", target_id = :id
+
+			// 点赞评论： POST /api/v1/moments/:id/comments/:comment_id/like
+			authMoments.POST("/:moment_id/comments/:comment_id/like", likeHandler.Like)
+
+			//取消点赞
+			// 取消点赞同理
+			authMoments.DELETE("/:moment_id/like", likeHandler.UnLike)
+			authMoments.DELETE("/:moment_id/comments/:comment_id/like", likeHandler.UnLike)
 		}
 	}
 }

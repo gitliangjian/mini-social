@@ -46,6 +46,10 @@ func main() {
 	commentService := service.NewCommentService(commentRepo)
 	commentHandler := handler.NewCommentHandler(commentService)
 
+	likeRepo := repository.NewLikeRepository(db)
+	likeService := service.NewLikeService(likeRepo)
+	likeHandler := handler.NewLikeHandler(likeService)
+
 	r := gin.Default()
 
 	r.GET("/test", func(c *gin.Context) {
@@ -55,7 +59,7 @@ func main() {
 	})
 
 	router.RegisterUserRoutes(r, cfg, userHandler)
-	router.RegisterMomentRoutes(r, cfg, momentHandler, commentHandler)
+	router.RegisterMomentRoutes(r, cfg, momentHandler, commentHandler, likeHandler)
 
 	//加载服务端口号
 	addr := ":" + cfg.App.Port
