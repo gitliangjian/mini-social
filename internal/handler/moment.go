@@ -95,7 +95,7 @@ func (h *MomentHandler) List(c *gin.Context) {
 // 动态详情
 func (h *MomentHandler) Detail(c *gin.Context) {
 	//使用无符号整数解析ID
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("moment_id"), 10, 64)
 	if err != nil {
 		response.BadRequest(c, "invalid moment id")
 		return
@@ -147,7 +147,7 @@ func (h *MomentHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("moment_id"), 10, 64)
 	if err != nil {
 		response.BadRequest(c, "invalid moment id")
 		return

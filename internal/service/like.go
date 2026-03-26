@@ -31,7 +31,7 @@ type LikeInput struct {
 func (s *LikeService) Like(input LikeInput) (int64, error) {
 	//点赞失败返回0
 	if err := s.likeRepo.Like(input.UserID, input.TargetType, input.TargetID); err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	//点赞成功返回点赞数
@@ -42,7 +42,7 @@ func (s *LikeService) Like(input LikeInput) (int64, error) {
 // 取消点赞
 func (s *LikeService) UnLike(input LikeInput) (int64, error) {
 	if err := s.likeRepo.UnLike(input.UserID, input.TargetType, input.TargetID); err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	count, _ := s.likeRepo.CountByTarget(input.TargetType, input.TargetID)
